@@ -44,17 +44,24 @@ namespace VoxelViewer
 			GraphicsDevice.SetDepthStencilState(depthState);*/
 
 			//Load VoxelBrush
-			int t0, t1;
+			uint32 t0, t1;
 
 			var stream = new FileStream();
 			var result = stream.Open(@".\Content\monu1.vox", FileAccess.Read);
 			if (result case .Ok)
 			{
+				var mstream = new MemoryStream();
+				t0 = Environment.TickCount;
+				stream.CopyTo(mstream);
+				mstream.Seek(0);
+				t1 = Environment.TickCount;
+				Console.WriteLine("Brush file loaded in {0} ms", t1-t0);
+				
 				t0 = Environment.TickCount;
 				MagicaVoxelLoader loader = new MagicaVoxelLoader();
-				loader.ReadFile(stream);
+				loader.ReadFile(mstream);
 				t1 = Environment.TickCount;
-				Console.WriteLine("Brush loaded in {0} ms", t1-t0);
+				Console.WriteLine("Brush imported in {0} ms", t1-t0);
 
 				t0 = Environment.TickCount;
 				m_voxelBrush = new CubeBrush(this, loader.Array, loader.Palette);
@@ -63,6 +70,8 @@ namespace VoxelViewer
 				t1 = Environment.TickCount;
 				Console.WriteLine("Brush build in {0} ms", t1-t0);
 
+				mstream.Close();
+				delete mstream;
 
 				delete loader;
 			}
